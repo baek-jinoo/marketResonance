@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  MSUTextView.h
 //  media-support
 //
 //  Created by Jinwoo Baek on 2/7/15.
@@ -8,8 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController <UITextViewDelegate>
-
+@interface MSUTextView : UITextView
 
 @end
-

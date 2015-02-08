@@ -10,10 +10,11 @@
 		CBA717C41A86CA1100BF5CF6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CBA717C31A86CA1100BF5CF6 /* main.m */; };
 		CBA717C71A86CA1100BF5CF6 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CBA717C61A86CA1100BF5CF6 /* AppDelegate.m */; };
 		CBA717CA1A86CA1100BF5CF6 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CBA717C91A86CA1100BF5CF6 /* ViewController.m */; };
-		CBA717CD1A86CA1100BF5CF6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBA717CB1A86CA1100BF5CF6 /* Main.storyboard */; };
 		CBA717CF1A86CA1100BF5CF6 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CBA717CE1A86CA1100BF5CF6 /* Images.xcassets */; };
 		CBA717D21A86CA1100BF5CF6 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBA717D01A86CA1100BF5CF6 /* LaunchScreen.xib */; };
 		CBA717DE1A86CA1100BF5CF6 /* media_supportTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CBA717DD1A86CA1100BF5CF6 /* media_supportTests.m */; };
+		CBA717E81A86D7FB00BF5CF6 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBA717E71A86D7FB00BF5CF6 /* ViewController.xib */; };
+		CBA717F11A8707DB00BF5CF6 /* MSUTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CBA717F01A8707DB00BF5CF6 /* MSUTextView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,12 +35,14 @@
 		CBA717C61A86CA1100BF5CF6 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		CBA717C81A86CA1100BF5CF6 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		CBA717C91A86CA1100BF5CF6 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		CBA717CC1A86CA1100BF5CF6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		CBA717CE1A86CA1100BF5CF6 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		CBA717D11A86CA1100BF5CF6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		CBA717D71A86CA1100BF5CF6 /* media-supportTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "media-supportTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBA717DC1A86CA1100BF5CF6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CBA717DD1A86CA1100BF5CF6 /* media_supportTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = media_supportTests.m; sourceTree = "<group>"; };
+		CBA717E71A86D7FB00BF5CF6 /* ViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
+		CBA717EF1A8707DB00BF5CF6 /* MSUTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSUTextView.h; sourceTree = "<group>"; };
+		CBA717F01A8707DB00BF5CF6 /* MSUTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSUTextView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,10 +88,12 @@
 				CBA717C61A86CA1100BF5CF6 /* AppDelegate.m */,
 				CBA717C81A86CA1100BF5CF6 /* ViewController.h */,
 				CBA717C91A86CA1100BF5CF6 /* ViewController.m */,
-				CBA717CB1A86CA1100BF5CF6 /* Main.storyboard */,
 				CBA717CE1A86CA1100BF5CF6 /* Images.xcassets */,
 				CBA717D01A86CA1100BF5CF6 /* LaunchScreen.xib */,
 				CBA717C11A86CA1100BF5CF6 /* Supporting Files */,
+				CBA717E71A86D7FB00BF5CF6 /* ViewController.xib */,
+				CBA717EF1A8707DB00BF5CF6 /* MSUTextView.h */,
+				CBA717F01A8707DB00BF5CF6 /* MSUTextView.m */,
 			);
 			path = "media-support";
 			sourceTree = "<group>";
@@ -199,8 +204,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CBA717CD1A86CA1100BF5CF6 /* Main.storyboard in Resources */,
 				CBA717D21A86CA1100BF5CF6 /* LaunchScreen.xib in Resources */,
+				CBA717E81A86D7FB00BF5CF6 /* ViewController.xib in Resources */,
 				CBA717CF1A86CA1100BF5CF6 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -220,6 +225,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CBA717CA1A86CA1100BF5CF6 /* ViewController.m in Sources */,
+				CBA717F11A8707DB00BF5CF6 /* MSUTextView.m in Sources */,
 				CBA717C71A86CA1100BF5CF6 /* AppDelegate.m in Sources */,
 				CBA717C41A86CA1100BF5CF6 /* main.m in Sources */,
 			);
@@ -244,14 +250,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		CBA717CB1A86CA1100BF5CF6 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CBA717CC1A86CA1100BF5CF6 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		CBA717D01A86CA1100BF5CF6 /* LaunchScreen.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -414,6 +412,7 @@
 				CBA717E31A86CA1100BF5CF6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		CBA717E41A86CA1100BF5CF6 /* Build configuration list for PBXNativeTarget "media-supportTests" */ = {
 			isa = XCConfigurationList;
@@ -422,6 +421,7 @@
 				CBA717E61A86CA1100BF5CF6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
