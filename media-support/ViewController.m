@@ -15,7 +15,7 @@ static NSString *kNoAlternatives = @"No Alternatives";
 @interface ViewController ()
 
 @property (weak, nonatomic) IBOutlet UITextView *textView;
-@property (copy, nonatomic) NSMutableDictionary *actionDictionary;
+@property (strong, nonatomic) NSMutableDictionary *actionDictionary;
 
 @end
 
@@ -23,6 +23,7 @@ static NSString *kNoAlternatives = @"No Alternatives";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.actionDictionary = [NSMutableDictionary dictionary];
     self.textView.delegate = self;
     self.textView.allowsEditingTextAttributes = NO;
     self.textView.textContainerInset = UIEdgeInsetsMake(10.0f, 10.0f, 10.0f, 10.0f);
@@ -36,6 +37,7 @@ static NSString *kNoAlternatives = @"No Alternatives";
 
 - (void)textViewDidChangeSelection:(UITextView *)textView;
 {
+    NSMutableArray *menuItems;
     NSLog(@"text view did change selection");
     NSString *subString = [self.textView.text substringWithRange:self.textView.selectedRange];
     //Get alternative strings
@@ -47,25 +49,28 @@ static NSString *kNoAlternatives = @"No Alternatives";
             [NSThread sleepForTimeInterval:0.2];
         }
         
-        NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:kNumberOfAlternatives];
+        menuItems = [NSMutableArray arrayWithCapacity:kNumberOfAlternatives];
         Class cls = [self class];
         SEL fwd = @selector(forwarder:);
         for (NSString *phrase in alternativePhrases) {
-            UIMenuItem *menuItem = [[UIMenuItem alloc] initWithTitle:phrase action:@selector(forwarder:)];
-            [menuItems insertObject:menuItem atIndex:0];
             SEL sel = [self uniqueActionSelectorWithString:phrase];
             // assuming keys not being retained, otherwise use NSValue:
-            [self.actionDictionary setObject:phrase forKey:NSStringFromSelector(sel)];
+//            [self.actionDictionary setObject:phrase forKey:NSStringFromSelector(sel)];
+            NSString *something = NSStringFromSelector(sel);
+            [self.actionDictionary setObject:phrase forKey:something];
             class_addMethod(cls, sel, [cls instanceMethodForSelector:fwd], "v@:@");
+            UIMenuItem *menuItem = [[UIMenuItem alloc] initWithTitle:phrase action:sel];
+            [menuItems insertObject:menuItem atIndex:0];
             // now add menu item with sel as the action
         }
-        [UIMenuController sharedMenuController].menuItems = menuItems;
     }
+    [UIMenuController sharedMenuController].menuItems = menuItems;
 }
 
 - (void)forwarder:(UIMenuController *)mc {
     NSLog(@"Phrase for item is: %@", [self.actionDictionary objectForKey:NSStringFromSelector(_cmd)]);
     NSLog(@"the selector for item is: %@", NSStringFromSelector(_cmd));
+    
 }
 
 - (SEL)uniqueActionSelectorWithString:(NSString *)phrase {
@@ -113,10 +118,6 @@ static NSString *kNoAlternatives = @"No Alternatives";
         }
     }];
     [uploadTask resume];
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
 }
 
 @end
