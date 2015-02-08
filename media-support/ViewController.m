@@ -18,6 +18,8 @@ static NSString *kNoAlternatives = @"No Alternatives";
 @property (weak, nonatomic) IBOutlet MSUTextView *textView;
 @property (strong, nonatomic) NSMutableDictionary *actionDictionary;
 @property (strong, nonatomic) NSDate *lastTimeSelectionChanged;
+@property (strong, nonatomic) UIActivityIndicatorView *activityIndicatorView;
+@property (strong, nonatomic) NSString *currentRequest;
 
 @end
 
@@ -29,7 +31,7 @@ static NSString *kNoAlternatives = @"No Alternatives";
     self.textView.delegate = self;
     self.textView.allowsEditingTextAttributes = NO;
     self.textView.textContainerInset = UIEdgeInsetsMake(10.0f, 10.0f, 10.0f, 10.0f);
-//    [self.textView becomeFirstResponder];
+    
     BOOL flag = YES;
     NSMutableArray *gestureRecognizers = [NSMutableArray arrayWithCapacity:[self.textView.gestureRecognizers count]];
     for (UIGestureRecognizer *gestureRecognizer in self.textView.gestureRecognizers) {
@@ -63,33 +65,67 @@ static NSString *kNoAlternatives = @"No Alternatives";
 
 - (void)textViewDidChangeSelection:(UITextView *)textView;
 {
-    NSMutableArray *menuItems;
-    NSLog(@"text view did change selection");
-    NSString *subString = [self.textView.text substringWithRange:self.textView.selectedRange];
-    //Get alternative strings
-    NSMutableArray *alternativePhrases = [NSMutableArray array];
-    if ([subString length] > 0) {
-        [self getSynonymsForString:subString array:alternativePhrases];
-    
-        while ([alternativePhrases count] < 1) {
-            [NSThread sleepForTimeInterval:0.2];
-        }
-        
-        menuItems = [NSMutableArray arrayWithCapacity:kNumberOfAlternatives];
-        SEL fwd = @selector(forwarder:);
-        for (NSString *phrase in alternativePhrases) {
-            SEL sel = [self uniqueActionSelectorWithString:phrase];
-            // assuming keys not being retained, otherwise use NSValue:
-            [self.actionDictionary setObject:phrase forKey:NSStringFromSelector(sel)];
-            NSString *something = NSStringFromSelector(sel);
-            [self.actionDictionary setObject:phrase forKey:something];
-            class_addMethod([self class], sel, [[self class] instanceMethodForSelector:fwd], "v@:@");
-            UIMenuItem *menuItem = [[UIMenuItem alloc] initWithTitle:phrase action:sel];
-            [menuItems insertObject:menuItem atIndex:0];
-            // now add menu item with sel as the action
-        }
+    [UIMenuController sharedMenuController].menuItems = nil;
+    self.currentRequest = [[NSUUID UUID] UUIDString];
+    [self.activityIndicatorView removeFromSuperview];
+    if (!self.lastTimeSelectionChanged) {
+        self.lastTimeSelectionChanged = [NSDate dateWithTimeIntervalSince1970:0];
     }
-    [UIMenuController sharedMenuController].menuItems = menuItems;
+    NSDate *currentDate = [NSDate date];
+    NSComparisonResult comparisonResult = [self.lastTimeSelectionChanged compare:currentDate];
+    if (comparisonResult == NSOrderedAscending && [currentDate timeIntervalSinceDate:self.lastTimeSelectionChanged] > 5.0) {
+        __block NSMutableArray *menuItems;
+        NSString *subString = [self.textView.text substringWithRange:self.textView.selectedRange];
+        //Get alternative strings
+        NSMutableArray *alternativePhrases = [NSMutableArray array];
+        if ([subString length] > 0) {
+            [self getSynonymsForString:subString array:alternativePhrases];
+        
+            [[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
+            UITextRange * selectionRange = [self.textView selectedTextRange];
+            CGRect selectionStartRect = [self.textView caretRectForPosition:selectionRange.start];
+            CGRect selectionEndRect = [self.textView caretRectForPosition:selectionRange.end];
+            CGPoint selectionCenterPoint = (CGPoint){(selectionStartRect.origin.x + selectionEndRect.origin.x)/2,(selectionStartRect.origin.y + selectionStartRect.size.height / 2)};
+            
+            CGRect activityIndicatorRect = CGRectMake(selectionCenterPoint.x - 20, selectionCenterPoint.y - 20, 40, 40);
+            self.activityIndicatorView = [[UIActivityIndicatorView alloc] initWithFrame:activityIndicatorRect];
+            self.activityIndicatorView.color = [UIColor blueColor];
+            [self.textView addSubview:self.activityIndicatorView];
+            [self.activityIndicatorView startAnimating];
+            dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+                NSString *currentRequestCopy = [self.currentRequest copy];
+                while ([alternativePhrases count] < 1) {
+                    [NSThread sleepForTimeInterval:0.2];
+                }
+                dispatch_async(dispatch_get_main_queue(), ^(void){
+                    [self.activityIndicatorView removeFromSuperview];
+                    if ([self.currentRequest isEqualToString:currentRequestCopy]) {
+                        menuItems = [NSMutableArray arrayWithCapacity:kNumberOfAlternatives];
+                        SEL fwd = @selector(forwarder:);
+                        for (NSString *phrase in alternativePhrases) {
+                            SEL sel = [self uniqueActionSelectorWithString:phrase];
+                            [self.actionDictionary setObject:phrase forKey:NSStringFromSelector(sel)];
+                            NSString *something = NSStringFromSelector(sel);
+                            [self.actionDictionary setObject:phrase forKey:something];
+                            class_addMethod([self class], sel, [[self class] instanceMethodForSelector:fwd], "v@:@");
+                            UIMenuItem *menuItem = [[UIMenuItem alloc] initWithTitle:phrase action:sel];
+                            [menuItems insertObject:menuItem atIndex:0];
+                        }
+                        UITextRange * selectionRange = [self.textView selectedTextRange];
+                        CGRect selectionStartRect = [self.textView caretRectForPosition:selectionRange.start];
+                        CGRect selectionEndRect = [self.textView caretRectForPosition:selectionRange.end];
+                        
+                        CGRect activityIndicatorRect = CGRectMake(selectionStartRect.origin.x, selectionStartRect.origin.y, selectionEndRect.origin.x - selectionStartRect.origin.x, selectionStartRect.size.height);
+                        
+                        [UIMenuController sharedMenuController].menuItems = menuItems;
+                        [[UIMenuController sharedMenuController] setTargetRect:activityIndicatorRect inView:self.textView];
+                        [[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
+                    }
+                });
+            });
+        }
+        [UIMenuController sharedMenuController].menuItems = menuItems;
+    }
 }
 
 - (void)forwarder:(UIMenuController *)mc {
@@ -148,6 +184,7 @@ static NSString *kNoAlternatives = @"No Alternatives";
         }
     }];
     [uploadTask resume];
+    self.lastTimeSelectionChanged = [NSDate date];
 }
 
 @end
