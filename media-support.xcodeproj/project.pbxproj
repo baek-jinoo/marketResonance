@@ -15,7 +15,6 @@
 		CBA717DE1A86CA1100BF5CF6 /* media_supportTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CBA717DD1A86CA1100BF5CF6 /* media_supportTests.m */; };
 		CBA717E81A86D7FB00BF5CF6 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBA717E71A86D7FB00BF5CF6 /* ViewController.xib */; };
 		CBA717F11A8707DB00BF5CF6 /* MSUTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CBA717F01A8707DB00BF5CF6 /* MSUTextView.m */; };
-		CBA717F71A87E3D400BF5CF6 /* MSUMenuItemView.m in Sources */ = {isa = PBXBuildFile; fileRef = CBA717F61A87E3D400BF5CF6 /* MSUMenuItemView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,8 +43,6 @@
 		CBA717E71A86D7FB00BF5CF6 /* ViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
 		CBA717EF1A8707DB00BF5CF6 /* MSUTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSUTextView.h; sourceTree = "<group>"; };
 		CBA717F01A8707DB00BF5CF6 /* MSUTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSUTextView.m; sourceTree = "<group>"; };
-		CBA717F51A87E3D400BF5CF6 /* MSUMenuItemView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSUMenuItemView.h; sourceTree = "<group>"; };
-		CBA717F61A87E3D400BF5CF6 /* MSUMenuItemView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSUMenuItemView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,8 +94,6 @@
 				CBA717E71A86D7FB00BF5CF6 /* ViewController.xib */,
 				CBA717EF1A8707DB00BF5CF6 /* MSUTextView.h */,
 				CBA717F01A8707DB00BF5CF6 /* MSUTextView.m */,
-				CBA717F51A87E3D400BF5CF6 /* MSUMenuItemView.h */,
-				CBA717F61A87E3D400BF5CF6 /* MSUMenuItemView.m */,
 			);
 			path = "media-support";
 			sourceTree = "<group>";
@@ -232,7 +227,6 @@
 				CBA717CA1A86CA1100BF5CF6 /* ViewController.m in Sources */,
 				CBA717F11A8707DB00BF5CF6 /* MSUTextView.m in Sources */,
 				CBA717C71A86CA1100BF5CF6 /* AppDelegate.m in Sources */,
-				CBA717F71A87E3D400BF5CF6 /* MSUMenuItemView.m in Sources */,
 				CBA717C41A86CA1100BF5CF6 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

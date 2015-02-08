@@ -17,6 +17,7 @@ static NSString *kNoAlternatives = @"No Alternatives";
 
 @property (weak, nonatomic) IBOutlet MSUTextView *textView;
 @property (strong, nonatomic) NSMutableDictionary *actionDictionary;
+@property (strong, nonatomic) NSDate *lastTimeSelectionChanged;
 
 @end
 
@@ -29,6 +30,25 @@ static NSString *kNoAlternatives = @"No Alternatives";
     self.textView.allowsEditingTextAttributes = NO;
     self.textView.textContainerInset = UIEdgeInsetsMake(10.0f, 10.0f, 10.0f, 10.0f);
 //    [self.textView becomeFirstResponder];
+    BOOL flag = YES;
+    NSMutableArray *gestureRecognizers = [NSMutableArray arrayWithCapacity:[self.textView.gestureRecognizers count]];
+    for (UIGestureRecognizer *gestureRecognizer in self.textView.gestureRecognizers) {
+        NSLog(@"gesture recognizer: [%@]", [gestureRecognizer description]);
+        if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]) {
+            UITapGestureRecognizer *tapGestureRecognizer = (UITapGestureRecognizer *)gestureRecognizer;
+            if (tapGestureRecognizer.numberOfTapsRequired == 2) {
+                UITapGestureRecognizer *newTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(textSelection)];
+                newTapGestureRecognizer.numberOfTapsRequired = 2;
+                newTapGestureRecognizer.delaysTouchesEnded = NO;
+                [gestureRecognizers insertObject:newTapGestureRecognizer atIndex:0];
+            }
+        }
+        if (flag) {
+            [gestureRecognizers insertObject:gestureRecognizer atIndex:0];
+        }
+        flag = YES;
+    }
+    self.textView.gestureRecognizers = gestureRecognizers;
 }
 
 - (void)titleAction:(id)sender;
@@ -36,16 +56,10 @@ static NSString *kNoAlternatives = @"No Alternatives";
     NSLog(@"title action method called with sender: [%@]", sender);
 }
 
-//-(BOOL)canPerformAction:(SEL)action withSender:(id)sender;
-//{
-//    BOOL returnValue = [super canPerformAction:action withSender:sender];
-//    for (NSString *selectorName in self.allowedActions) {
-//        if ([NSStringFromSelector(action) isEqualToString:selectorName]) {
-//            return YES;
-//        }
-//    }
-//    return returnValue;
-//}
+- (void)textSelection;
+{
+    NSLog(@"text selection");
+}
 
 - (void)textViewDidChangeSelection:(UITextView *)textView;
 {
@@ -70,7 +84,7 @@ static NSString *kNoAlternatives = @"No Alternatives";
             NSString *something = NSStringFromSelector(sel);
             [self.actionDictionary setObject:phrase forKey:something];
             class_addMethod([self class], sel, [[self class] instanceMethodForSelector:fwd], "v@:@");
-            UIMenuItem *menuItem = [[UIMenuItem alloc] initWithTitle:phrase action:@selector(forwarder:)];
+            UIMenuItem *menuItem = [[UIMenuItem alloc] initWithTitle:phrase action:sel];
             [menuItems insertObject:menuItem atIndex:0];
             // now add menu item with sel as the action
         }
@@ -81,6 +95,11 @@ static NSString *kNoAlternatives = @"No Alternatives";
 - (void)forwarder:(UIMenuController *)mc {
     NSLog(@"Phrase for item is: %@", [self.actionDictionary objectForKey:NSStringFromSelector(_cmd)]);
     NSLog(@"the selector for item is: %@", NSStringFromSelector(_cmd));
+    NSString *replacementPhrase = [self.actionDictionary objectForKey:NSStringFromSelector(_cmd)];
+    if (![replacementPhrase isEqualToString:kNoAlternatives]) {
+        self.textView.text = [self.textView.text stringByReplacingCharactersInRange:self.textView.selectedRange withString:replacementPhrase];
+    }
+    
     [UIMenuController sharedMenuController].menuItems = nil;
 }
 
