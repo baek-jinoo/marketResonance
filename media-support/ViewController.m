@@ -8,13 +8,14 @@
 
 #import "ViewController.h"
 #import <objc/runtime.h>
+#import "MSUTextView.h"
 
 static int kNumberOfAlternatives = 5;
 static NSString *kNoAlternatives = @"No Alternatives";
 
 @interface ViewController ()
 
-@property (weak, nonatomic) IBOutlet UITextView *textView;
+@property (weak, nonatomic) IBOutlet MSUTextView *textView;
 @property (strong, nonatomic) NSMutableDictionary *actionDictionary;
 
 @end
@@ -27,13 +28,24 @@ static NSString *kNoAlternatives = @"No Alternatives";
     self.textView.delegate = self;
     self.textView.allowsEditingTextAttributes = NO;
     self.textView.textContainerInset = UIEdgeInsetsMake(10.0f, 10.0f, 10.0f, 10.0f);
-    [self.textView becomeFirstResponder];
+//    [self.textView becomeFirstResponder];
 }
 
 - (void)titleAction:(id)sender;
 {
     NSLog(@"title action method called with sender: [%@]", sender);
 }
+
+//-(BOOL)canPerformAction:(SEL)action withSender:(id)sender;
+//{
+//    BOOL returnValue = [super canPerformAction:action withSender:sender];
+//    for (NSString *selectorName in self.allowedActions) {
+//        if ([NSStringFromSelector(action) isEqualToString:selectorName]) {
+//            return YES;
+//        }
+//    }
+//    return returnValue;
+//}
 
 - (void)textViewDidChangeSelection:(UITextView *)textView;
 {
@@ -50,16 +62,15 @@ static NSString *kNoAlternatives = @"No Alternatives";
         }
         
         menuItems = [NSMutableArray arrayWithCapacity:kNumberOfAlternatives];
-        Class cls = [self class];
         SEL fwd = @selector(forwarder:);
         for (NSString *phrase in alternativePhrases) {
             SEL sel = [self uniqueActionSelectorWithString:phrase];
             // assuming keys not being retained, otherwise use NSValue:
-//            [self.actionDictionary setObject:phrase forKey:NSStringFromSelector(sel)];
+            [self.actionDictionary setObject:phrase forKey:NSStringFromSelector(sel)];
             NSString *something = NSStringFromSelector(sel);
             [self.actionDictionary setObject:phrase forKey:something];
-            class_addMethod(cls, sel, [cls instanceMethodForSelector:fwd], "v@:@");
-            UIMenuItem *menuItem = [[UIMenuItem alloc] initWithTitle:phrase action:sel];
+            class_addMethod([self class], sel, [[self class] instanceMethodForSelector:fwd], "v@:@");
+            UIMenuItem *menuItem = [[UIMenuItem alloc] initWithTitle:phrase action:@selector(forwarder:)];
             [menuItems insertObject:menuItem atIndex:0];
             // now add menu item with sel as the action
         }
@@ -70,11 +81,11 @@ static NSString *kNoAlternatives = @"No Alternatives";
 - (void)forwarder:(UIMenuController *)mc {
     NSLog(@"Phrase for item is: %@", [self.actionDictionary objectForKey:NSStringFromSelector(_cmd)]);
     NSLog(@"the selector for item is: %@", NSStringFromSelector(_cmd));
-    
+    [UIMenuController sharedMenuController].menuItems = nil;
 }
 
 - (SEL)uniqueActionSelectorWithString:(NSString *)phrase {
-    NSString *selString = [NSString stringWithFormat:@"menu_%@:", phrase];
+    NSString *selString = [NSString stringWithFormat:@"menu_%@:", [phrase stringByReplacingOccurrencesOfString:@" " withString:@"_"]];
     SEL sel = sel_registerName([selString UTF8String]);
     return sel;
 }

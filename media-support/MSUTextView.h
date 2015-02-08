@@ -10,4 +10,6 @@
 
 @interface MSUTextView : UITextView
 
+//@property (strong, nonatomic) NSMutableArray *allowedSelectors;
+
 @end

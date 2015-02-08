@@ -10,6 +10,24 @@
 
 @implementation MSUTextView
 
+//- (instancetype)init;
+//{
+//    self = [super init];
+//    if (self) {
+//        _allowedSelectors = [NSMutableArray array];
+//    }
+//    return self;
+//}
+//
+//- (id)initWithCoder:(NSCoder *)aDecoder;
+//{
+//    self = [super initWithCoder:aDecoder];
+//    if (self) {
+//        _allowedSelectors = [NSMutableArray array];
+//    }
+//    return self;
+//}
+
 -(BOOL)canPerformAction:(SEL)action withSender:(id)sender;
 {
     BOOL returnValue = [super canPerformAction:action withSender:sender];
@@ -22,6 +40,11 @@
     } else if (action == @selector(_define:)) {
         returnValue = NO;
     }
+//    for (NSString *selectorName in self.allowedSelectors) {
+//        if (NSStringFromSelector(action)  == selectorName) {
+//            return YES;
+//        }
+//    }
     return returnValue;
 }
 
