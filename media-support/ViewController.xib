@@ -20,6 +20,9 @@
                     <state key="normal" title="Copy">
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
+                    <connections>
+                        <action selector="copy:" destination="-1" eventType="touchUpInside" id="hzi-B3-3xb"/>
+                    </connections>
                 </button>
                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="You must go to the exhibitor table of each sponsor whose challenges you are submitting. You must pitch your startup." translatesAutoresizingMaskIntoConstraints="NO" id="Ael-J2-6ka" customClass="MSUTextView">
                     <rect key="frame" x="0.0" y="8" width="600" height="514"/>

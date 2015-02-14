@@ -21,21 +21,43 @@ static NSString *kNoAlternatives = @"No Alternatives";
 @property (strong, nonatomic) UIActivityIndicatorView *activityIndicatorView;
 @property (strong, nonatomic) NSString *currentRequest;
 
+- (IBAction)copy:(id)sender;
+
 @end
 
 @implementation ViewController
+
+- (void)copy:(id)sender;
+{
+    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+    pasteboard.string = self.textView.text;
+    
+    CGRect messageRect = CGRectMake(0, 0, 100, 50);
+    UILabel *message = [[UILabel alloc] initWithFrame:messageRect];
+    message.center = self.view.center;
+    message.text = @"Copied";
+    message.layer.borderWidth = 5.0f;
+    message.layer.borderColor = [UIColor blueColor].CGColor;
+    message.layer.cornerRadius = 7.0f;
+    message.textAlignment = NSTextAlignmentCenter;
+    message.alpha = 0.5f;
+    [self.textView addSubview:message];
+    [UIView animateWithDuration:1.5f animations:^{
+        message.alpha = 0.0f;
+    }];
+    
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.actionDictionary = [NSMutableDictionary dictionary];
     self.textView.delegate = self;
     self.textView.allowsEditingTextAttributes = NO;
-    self.textView.textContainerInset = UIEdgeInsetsMake(10.0f, 10.0f, 10.0f, 10.0f);
+    self.textView.textContainerInset = UIEdgeInsetsMake(20.0f, 10.0f, 10.0f, 10.0f);
     
     BOOL flag = YES;
     NSMutableArray *gestureRecognizers = [NSMutableArray arrayWithCapacity:[self.textView.gestureRecognizers count]];
     for (UIGestureRecognizer *gestureRecognizer in self.textView.gestureRecognizers) {
-        NSLog(@"gesture recognizer: [%@]", [gestureRecognizer description]);
         if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]) {
             UITapGestureRecognizer *tapGestureRecognizer = (UITapGestureRecognizer *)gestureRecognizer;
             if (tapGestureRecognizer.numberOfTapsRequired == 2) {
@@ -51,6 +73,7 @@ static NSString *kNoAlternatives = @"No Alternatives";
         flag = YES;
     }
     self.textView.gestureRecognizers = gestureRecognizers;
+    [self updateMessageResonance];
 }
 
 - (void)titleAction:(id)sender;
@@ -61,6 +84,73 @@ static NSString *kNoAlternatives = @"No Alternatives";
 - (void)textSelection;
 {
     NSLog(@"text selection");
+}
+
+- (void)textViewDidEndEditing:(UITextView *)textView;
+{
+    NSLog(@"text view did end editing");
+    
+}
+
+- (void)updateMessageResonance;
+{
+    NSURLSessionConfiguration *defaultSessionConfiguration = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:defaultSessionConfiguration];
+    NSString *baseURL = @"https://gateway.watsonplatform.net/messageresonance/service/api/v1/ringscore";
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+    request.HTTPMethod = @"GET";
+    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    [request setValue:@"Basic YTI3YTAyMjEtNWY0MC00NmZhLWIwNWEtN2NmZjIxZWM2NjEyOnNMaDVUSnFMM1o0ZQ==" forHTTPHeaderField:@"Authorization"];
+    
+    NSArray *words = [self.textView.text componentsSeparatedByCharactersInSet:[[NSCharacterSet letterCharacterSet] invertedSet]];
+    
+    for (NSString *word in words) {
+        NSString *queryString = [NSString stringWithFormat:@"dataset=1&text=%@", word];
+        NSString *urlString = [NSString stringWithFormat:@"%@?%@", baseURL, queryString];
+        NSURL *url = [NSURL URLWithString:[urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+        request.URL = url;
+        NSURLSessionDataTask *downloadTask = [session dataTaskWithRequest:request completionHandler:^(NSData *responseData, NSURLResponse *response, NSError *requestError) {
+            NSHTTPURLResponse *httpResponse;
+            if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+                httpResponse = (NSHTTPURLResponse *)response;
+            }
+            if (!requestError && httpResponse.statusCode == 200) {
+                
+                dispatch_async(dispatch_get_main_queue(), ^(void){
+                    NSRange initialSelection = self.textView.selectedRange;
+                    NSDictionary *responseDictionary = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingAllowFragments error:nil];
+                    NSNumber *overallNumber = responseDictionary[@"overall"];
+                    CGFloat overall = [overallNumber floatValue];
+                    
+                    CGFloat red = (50.0f - overall) / 50.0f;
+                    if (red > 1.0f) {
+                        red = 1.0f;
+                    }
+                    CGFloat green = overall / 50;
+                    if (green > 1.0f) {
+                        green = 1.0f;
+                    }
+                    UIColor *color = [UIColor colorWithRed:red green:green blue:0.0f alpha:1.0f];
+                    
+                    NSRange range = [self.textView.text rangeOfString:word];
+                    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithAttributedString:self.textView.attributedText];
+                    [attributedString addAttribute:NSForegroundColorAttributeName value:color range:range];
+                    self.textView.attributedText = attributedString;
+                    self.textView.selectedRange = initialSelection;
+                });
+                
+            }
+        }];
+        [downloadTask resume];
+    }
+    
+}
+
+- (void)textViewDidChange:(UITextView *)textView;
+{
+    NSLog(@"text view did change");
+    
+    [self updateMessageResonance];
 }
 
 - (void)textViewDidChangeSelection:(UITextView *)textView;
@@ -129,13 +219,16 @@ static NSString *kNoAlternatives = @"No Alternatives";
 }
 
 - (void)forwarder:(UIMenuController *)mc {
-    NSLog(@"Phrase for item is: %@", [self.actionDictionary objectForKey:NSStringFromSelector(_cmd)]);
-    NSLog(@"the selector for item is: %@", NSStringFromSelector(_cmd));
+    NSUInteger currentLocation = self.textView.selectedRange.location;
     NSString *replacementPhrase = [self.actionDictionary objectForKey:NSStringFromSelector(_cmd)];
     if (![replacementPhrase isEqualToString:kNoAlternatives]) {
         self.textView.text = [self.textView.text stringByReplacingCharactersInRange:self.textView.selectedRange withString:replacementPhrase];
     }
     
+    NSUInteger newLocation = currentLocation;// + [replacementPhrase length];
+    self.textView.selectedRange = NSMakeRange(newLocation, 0);
+    
+    [self updateMessageResonance];
     [UIMenuController sharedMenuController].menuItems = nil;
 }
 
@@ -168,10 +261,9 @@ static NSString *kNoAlternatives = @"No Alternatives";
              httpResponse = (NSHTTPURLResponse *)response;
         }
         if (!requestError && httpResponse.statusCode == 200) {
-            NSArray *responseDictionary = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingAllowFragments error:nil];
-            NSLog(@"the returned dictionary: %@", responseDictionary);
-            if (responseDictionary) {
-                NSArray *temporarySynonyms = responseDictionary.firstObject[@"synonyms"];
+            NSArray *responseArray = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingAllowFragments error:nil];
+            if (responseArray) {
+                NSArray *temporarySynonyms = responseArray.firstObject[@"synonyms"];
                 for (NSDictionary *synonym in temporarySynonyms) {
                     [alternativePhrases insertObject:synonym[@"word"] atIndex:0];
                 }
